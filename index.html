@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Excuse Machine</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Anton&family=Oswald:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#fff;color:#111;font-family:'VT323',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+
+.hdr{width:100%;text-align:center;padding:1rem 1rem 0.7rem;border-bottom:2px solid #111;}
+.hdr h1{font-family:'Anton',sans-serif;font-size:clamp(2rem,7vw,4rem);color:#111;letter-spacing:0.08em;}
+.hdr-sub{font-size:0.9rem;color:#aaa;letter-spacing:0.25em;margin-top:0.1rem;}
+
+.ticker{width:100%;overflow:hidden;padding:0.3rem 0;border-bottom:1px solid #eee;background:#f9f9f9;white-space:nowrap;}
+.ticker-inner{display:inline-block;animation:tick 40s linear infinite;font-size:0.85rem;color:#bbb;letter-spacing:0.1em;}
+@keyframes tick{from{transform:translateX(100vw);}to{transform:translateX(-100%);}}
+
+.category-bar{width:min(500px,90vw);display:flex;flex-wrap:wrap;gap:0.4rem;padding:1rem 0 0.5rem;}
+.cat-btn{font-family:'VT323',monospace;font-size:0.9rem;letter-spacing:0.1em;padding:0.2rem 0.7rem;border:1px solid #ddd;background:#fff;color:#aaa;cursor:pointer;transition:all 0.15s;}
+.cat-btn:hover,.cat-btn.active{background:#111;color:#fff;border-color:#111;}
+
+.excuse-section{width:min(500px,90vw);border:2px solid #111;border-top:none;margin-top:0;}
+.e-label{background:#f5f5f5;border-bottom:1px solid #ddd;padding:0.35rem 1rem;font-size:0.78rem;color:#bbb;letter-spacing:0.2em;}
+.e-text{font-family:'Oswald',sans-serif;font-size:clamp(1.1rem,3.8vw,1.65rem);font-weight:700;line-height:1.35;color:#111;padding:1.3rem 1.3rem 0.7rem;min-height:110px;}
+.cursor{display:inline-block;width:3px;height:0.85em;background:#111;margin-left:2px;vertical-align:middle;animation:blink 0.65s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+.e-attr{padding:0 1.3rem 1rem;font-size:0.8rem;color:#ccc;letter-spacing:0.08em;}
+
+.btns{width:min(500px,90vw);display:flex;border:2px solid #111;border-top:none;}
+.btn{flex:1;padding:0.8rem;font-family:'VT323',monospace;font-size:1.1rem;letter-spacing:0.12em;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-more{background:#111;color:#fff;border-right:1px solid #333;}
+.btn-more:hover{background:#333;}
+.btn-copy{background:#fff;color:#aaa;}
+.btn-copy:hover{background:#111;color:#fff;}
+.btn-copy.copied{background:#111;color:#fff;}
+
+.rating-bar{width:min(500px,90vw);border:2px solid #111;border-top:none;display:flex;align-items:center;padding:0.6rem 1rem;gap:0.8rem;}
+.rating-label{font-size:0.78rem;color:#bbb;letter-spacing:0.15em;}
+.stars{display:flex;gap:0.2rem;}
+.star{font-size:1.2rem;cursor:pointer;color:#ddd;transition:color 0.1s;}
+.star.lit{color:#111;}
+.believability{font-size:0.8rem;color:#aaa;margin-left:auto;letter-spacing:0.1em;}
+
+.disc{max-width:440px;font-size:0.75rem;color:#ddd;text-align:center;line-height:1.7;padding:1rem 1rem 2.5rem;letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>EXCUSE MACHINE</h1>
+  <p class="hdr-sub">[ CERTIFIED PLAUSIBLE DENIABILITY GENERATOR ]</p>
+</div>
+
+<div class="ticker">
+  <span class="ticker-inner">
+    ▸ MY DOG ATE THE REPORT &nbsp;&nbsp;
+    ▸ TRAFFIC WAS UNPRECEDENTED &nbsp;&nbsp;
+    ▸ I THOUGHT IT WAS CASUAL FRIDAY &nbsp;&nbsp;
+    ▸ MY PHONE DIED (AND ALSO MY WIFI) &nbsp;&nbsp;
+    ▸ I HAD A FAMILY EMERGENCY (VAGUE) &nbsp;&nbsp;
+    ▸ THE ALGORITHM BURIED MY EMAIL &nbsp;&nbsp;
+    ▸ I WAS IN A MEETING ABOUT MEETINGS &nbsp;&nbsp;
+    ▸ MERCURY WAS IN RETROGRADE &nbsp;&nbsp;
+    ▸ I LITERALLY JUST SAW THIS &nbsp;&nbsp;
+    ▸ MY DOCTOR SAID NO STRESS &nbsp;&nbsp;
+  </span>
+</div>
+
+<div class="category-bar">
+  <button class="cat-btn active" onclick="setCategory('all',this)">ALL</button>
+  <button class="cat-btn" onclick="setCategory('work',this)">WORK</button>
+  <button class="cat-btn" onclick="setCategory('school',this)">SCHOOL</button>
+  <button class="cat-btn" onclick="setCategory('social',this)">SOCIAL</button>
+  <button class="cat-btn" onclick="setCategory('family',this)">FAMILY</button>
+  <button class="cat-btn" onclick="setCategory('health',this)">HEALTH</button>
+  <button class="cat-btn" onclick="setCategory('chaos',this)">PURE CHAOS</button>
+</div>
+
+<div class="excuse-section">
+  <div class="e-label">EXCUSE TRANSMISSION // CERTIFIED AUTHENTIC</div>
+  <div class="e-text"><span id="et"></span></div>
+  <div class="e-attr">— <span id="ea">believable source</span></div>
+</div>
+<div class="rating-bar">
+  <span class="rating-label">BELIEVABILITY:</span>
+  <div class="stars" id="stars">
+    <span class="star" onclick="rate(1)">★</span>
+    <span class="star" onclick="rate(2)">★</span>
+    <span class="star" onclick="rate(3)">★</span>
+    <span class="star" onclick="rate(4)">★</span>
+    <span class="star" onclick="rate(5)">★</span>
+  </div>
+  <span class="believability" id="believability">RATE THIS EXCUSE</span>
+</div>
+<div class="btns">
+  <button class="btn btn-more" onclick="newExcuse()">NEW EXCUSE</button>
+  <button class="btn btn-copy" id="copyBtn" onclick="copyIt()">COPY EXCUSE</button>
+</div>
+<p class="disc">for entertainment only · not responsible for consequences · use responsibly (or don't)</p>
+
+<script>
+const excuses = {
+  work: [
+    { text: "I sent it — did you check your spam folder? Sometimes our IT blocks attachments over 2MB.", attr: "the classic IT deflection" },
+    { text: "I was in back-to-back syncs all morning. Literally no oxygen to breathe, let alone reply to Slack.", attr: "corporate survivor" },
+    { text: "My Outlook crashed right as I was sending it. I have a screenshot of the error if you need it.", attr: "strategic ambiguity" },
+    { text: "I flagged this for EOD but EOD kept moving. You know how Tuesdays are.", attr: "time is a social construct" },
+    { text: "I thought Sarah was handling that. She said she'd loop me in after the standup.", attr: "masterful redirect" },
+    { text: "The VPN was down all afternoon and IT said it was a known issue. I have the ticket number.", attr: "documented chaos" },
+    { text: "I was heads-down on a P0 blocker. I literally could not context-switch without losing everything.", attr: "agile methodology" },
+    { text: "I submitted it through the portal but the portal gave me a success confirmation AND then ate it.", attr: "the system, not me" },
+    { text: "My calendar showed a conflict so I assumed the meeting was rescheduled. Nobody pinged me.", attr: "reasonable assumption" },
+    { text: "I'm still waiting on sign-off from Legal. I've chased them three times this week.", attr: "bureaucratic shield" },
+  ],
+  school: [
+    { text: "I submitted it on time but Blackboard/Canvas logged me out mid-upload and the timestamp was wrong.", attr: "portal betrayal" },
+    { text: "My laptop charger fried at 11:47pm. By the time I found a replacement it was technically tomorrow.", attr: "hardware tragedy" },
+    { text: "I had a family situation last week that I'd rather not get into, but I'm back on track now.", attr: "strategic vagueness" },
+    { text: "I was using the library printer and there was a 45-minute queue. The assignment was in my hand.", attr: "infrastructure failure" },
+    { text: "I was there — I sat in the back. Maybe you didn't see me because of where the projector was.", attr: "spatial defense" },
+    { text: "My notes from that lecture got corrupted. I thought I saved them to the cloud but it didn't sync.", attr: "cloud betrayal" },
+    { text: "I emailed you on Thursday. I can forward the original if the timestamp matters.", attr: "receipts ready" },
+    { text: "The instructions said 'before midnight' and I interpreted that as midnight of the following day.", attr: "language as a weapon" },
+  ],
+  social: [
+    { text: "I was literally about to text you. My phone died at the exact wrong moment, I'm not even kidding.", attr: "cosmic timing" },
+    { text: "I thought it was next weekend. I have it on my calendar as the 21st. Can we do the 21st?", attr: "calendar chaos" },
+    { text: "I RSVPed yes but something came up that I genuinely cannot get out of. Rain check though, seriously.", attr: "vague emergency" },
+    { text: "I replied to that story — did you not see it? Instagram buries replies now, it's genuinely broken.", attr: "algorithm blamed" },
+    { text: "I was in a weird headspace that week and social stuff felt like a lot. I should've said something.", attr: "rare honesty (still an excuse)" },
+    { text: "My location was off and I got completely lost. By the time I figured it out everyone had left.", attr: "navigation failure" },
+    { text: "I left my wallet at home and felt weird about you covering me again. I was embarrassed, honestly.", attr: "financial dignity" },
+    { text: "The group chat was muted — I muted it because of the notification spam and missed the plan change.", attr: "notification fatigue" },
+  ],
+  family: [
+    { text: "I didn't want to make it a whole thing at dinner so I just didn't bring it up. You know how Dad gets.", attr: "domestic peacekeeper" },
+    { text: "I forgot it was your birthday. I know. I have no excuse. I had a reminder and I snoozed it.", attr: "rare raw honesty" },
+    { text: "The kids had a thing and it completely derailed my entire week. I'm still recovering, honestly.", attr: "parental chaos" },
+    { text: "I thought Mom told you. She said she was going to tell you. This is genuinely on her.", attr: "the redirect" },
+    { text: "I've been dealing with something I haven't told anyone yet and I just needed a bit of space. I'm fine.", attr: "strategic mystery" },
+    { text: "The drive is three hours each way. It's not that I don't want to, it's the logistics.", attr: "geographic defense" },
+  ],
+  health: [
+    { text: "I woke up with something — not COVID, I tested, but definitely something. Didn't want to spread it.", attr: "responsible citizen" },
+    { text: "My back went out again. I can't sit, stand, or lie down comfortably. It's a whole thing.", attr: "spinal betrayal" },
+    { text: "I haven't been sleeping. Like, at all. I'm running on maybe four hours and I'm not functional.", attr: "circadian collapse" },
+    { text: "My anxiety has been really bad this week. I should've said something sooner but I kept thinking it'd pass.", attr: "mental health card" },
+    { text: "I think I'm getting sick. My throat is weird, I'm exhausted, and I don't want to push through it.", attr: "preemptive illness" },
+    { text: "My doctor said no screens after 8pm and I've been trying to actually do it this time.", attr: "medical orders" },
+  ],
+  chaos: [
+    { text: "Mercury is in retrograde and I've learned to just not make decisions during this period.", attr: "celestial alignment" },
+    { text: "A bird flew into my window and I spent 45 minutes making sure it was okay. It flew away. I cried a little.", attr: "avian incident" },
+    { text: "I genuinely forgot what day it was. Not like 'ha ha forgot' — I thought it was Wednesday for three days.", attr: "temporal dissociation" },
+    { text: "I started reading about something on Wikipedia and four hours disappeared. I'm not proud of this.", attr: "hyperlink rabbit hole" },
+    { text: "My horoscope specifically said to avoid commitments this week and I'm trying to listen to the universe.", attr: "cosmic guidance" },
+    { text: "I fell asleep at 7pm and woke up at 2am fully convinced I'd slept through to the next day. I had not.", attr: "time crime" },
+    { text: "A very convincing scam call had me occupied for 45 minutes before I realized. I'm still processing it.", attr: "social engineering victim" },
+    { text: "I was stress-cleaning my entire apartment and lost complete track of time. It looks incredible now though.", attr: "productive procrastination" },
+    { text: "My streaming service autoplayed one more episode and it was at a cliffhanger. I had no choice.", attr: "algorithmic captivity" },
+    { text: "I got into an argument with a stranger online and couldn't leave until I'd made my point. It took two hours.", attr: "principle over punctuality" },
+  ]
+};
+
+// Flatten all for "all" category
+const all = Object.values(excuses).flat();
+
+let currentCategory = 'all';
+let typeTimer = null, isTyping = false;
+
+const believabilityLabels = ['', 'BUSTED', 'SUSPICIOUS', 'PLAUSIBLE', 'CONVINCING', 'ACADEMY AWARD'];
+
+function setCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  newExcuse();
+}
+
+function getPool() {
+  return currentCategory === 'all' ? all : (excuses[currentCategory] || all);
+}
+
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+let lastExcuse = null;
+function newExcuse() {
+  if (isTyping) { clearInterval(typeTimer); isTyping = false; }
+  const pool = getPool();
+  let chosen;
+  do { chosen = pick(pool); } while (chosen === lastExcuse && pool.length > 1);
+  lastExcuse = chosen;
+  document.getElementById('ea').textContent = chosen.attr;
+  // reset rating
+  document.querySelectorAll('.star').forEach(s => s.classList.remove('lit'));
+  document.getElementById('believability').textContent = 'RATE THIS EXCUSE';
+  typewriter(chosen.text, document.getElementById('et'));
+  // reset copy btn
+  const cb = document.getElementById('copyBtn');
+  cb.textContent = 'COPY EXCUSE';
+  cb.classList.remove('copied');
+}
+
+function typewriter(text, el) {
+  isTyping = true;
+  el.innerHTML = '<span class="cursor"></span>';
+  const cur = el.querySelector('.cursor');
+  let i = 0;
+  clearInterval(typeTimer);
+  typeTimer = setInterval(() => {
+    if (i < text.length) { cur.insertAdjacentText('beforebegin', text[i++]); }
+    else { clearInterval(typeTimer); isTyping = false; }
+  }, 18);
+}
+
+function copyIt() {
+  const text = document.getElementById('et').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'COPIED ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY EXCUSE'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function rate(n) {
+  const stars = document.querySelectorAll('.star');
+  stars.forEach((s, i) => s.classList.toggle('lit', i < n));
+  document.getElementById('believability').textContent = believabilityLabels[n];
+}
+
+window.addEventListener('load', newExcuse);
+</script>
+</body>
+</html>
